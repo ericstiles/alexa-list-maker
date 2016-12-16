@@ -1,0 +1,12 @@
+HelloWorldIntent hello
+HelloWorldIntent hi
+ListIntent list
+ListIntent what is my list
+TotalCostIntent what is my total
+TotalCostIntent what does my list cost
+TotalCostIntent what is the price of my list
+UpdateIntent change {variable1} to quantity {variable3} in my list
+UpdateIntent update milk to quantity 3 in my list
+DeleteIntent remove milk from my list
+DeleteIntent delete milk from my list
+QuestionIntent what is the price of the milk in my list
