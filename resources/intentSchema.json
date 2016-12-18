@@ -1,10 +1,15 @@
 {
-  "intents": [
-    {
-      "intent": "HelloWorldIntent"
-    },
-    {
-      "intent": "ListIntent"
-    }
-  ]
+    "intents": [{
+        "intent": "HelloWorldIntent"
+    }, {
+        "intent": "ListIntent"
+    }, {
+        "intent": "TotalCostIntent"
+    }, {
+        "intent": "NumberItemItent",
+        "slots": [{
+            "name": "NUMBERCODE",
+            "type": "NUMBERCODES"
+        }]
+    }]
 }
