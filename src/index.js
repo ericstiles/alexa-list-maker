@@ -43,7 +43,8 @@ var totalCostResponseFunction = function(intent, session, response) {
 
 var numberItemResponseFunction = function(intent, session, response) {
     console.log("numberItemResponseFunction:" + JSON.stringify(intent.slots));
-    getNumberItem(function(body) {
+//    response.tell("SUCCESS");
+    getNumberItem(intent.slots.Item.value, function(body) {
         console.log("in numberItemResponseFunction function");
         console.log("4." + body);
         response.tell(body);
@@ -60,15 +61,10 @@ ListService.prototype.intentHandlers = {
     'NumberItemIntent': numberItemResponseFunction
 };
 
-
-
 exports.handler = function(event, context) {
 
     var listService = new ListService();
     listService.execute(event, context);
-
-
-
 
 };
 
@@ -78,12 +74,27 @@ function onLaunchCall(eventCallback) {
     eventCallback(responseText);
 }
 
-function getNumberItem(eventCallback) {
-    var responseText = 'Hello Eric from getNumberItem';
-    console.log(responseText);
-    eventCallback(responseText);
-}
+function getNumberItem(value, eventCallback) {
+    options.path = '/api/item/' + value;
+    console.log(options.path);
+    http.get(options, function(res) {
+        var body = '';
 
+        res.on('data', function(chunk) {
+            body += chunk;
+        });
+
+        res.on('end', function() {
+            var bodyObject = JSON.parse(body);
+            console.log("3. body: " + body);
+            var responseText = "Your items is " + bodyObject.text + ".";
+            console.log("3." + responseText);
+            eventCallback(responseText);
+        });
+    }).on('error', function(e) {
+        console.log("Got error: ", e);
+    });
+}
 function getTotalCost(intentName, eventCallback) {
     options.path = '/api/metalist';
     http.get(options, function(res) {
