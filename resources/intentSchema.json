@@ -6,10 +6,16 @@
     }, {
         "intent": "TotalCostIntent"
     }, {
-        "intent": "NumberItemItent",
+        "intent": "NumberItemIntent",
         "slots": [{
             "name": "NUMBERCODE",
             "type": "NUMBERCODES"
+        }]
+    }, {
+        "intent": "AddItemIntent",
+        "slots": [{
+            "name": "FOOD",
+            "type": "AMAZON.Food"
         }]
     }]
 }

@@ -3,7 +3,6 @@ var http = require('http');
 var AlexaSkill = require('./AlexaSkill');
 
 var APP_ID = 'amzn1.ask.skill.506f130c-3929-4169-bd15-768d20dded9c';
-var SPEECH_OUTPUT = 'Hello World One!';
 
 var options = {
     host: 'still-stream-24659.herokuapp.com',
@@ -42,13 +41,29 @@ var totalCostResponseFunction = function(intent, session, response) {
 };
 
 var numberItemResponseFunction = function(intent, session, response) {
-    console.log("numberItemResponseFunction:" + JSON.stringify(intent.slots));
-//    response.tell("SUCCESS");
-    getNumberItem(intent.slots.Item.value, function(body) {
+    console.log("1. numberItemResponseFunction:" + JSON.stringify(intent.slots));
+    console.log("2. numberItemResponseFunction:" + JSON.stringify(intent.slots.NUMBERCODE));
+    console.log("3. numberItemResponseFunction:" + JSON.stringify(intent.slots['NUMBERCODE']));
+    //    response.tell("SUCCESS");
+    getNumberItem(intent.slots.NUMBERCODE.value, function(body) {
         console.log("in numberItemResponseFunction function");
         console.log("4." + body);
         response.tell(body);
     });
+
+};
+
+var postNewFoodItemResponseFunction = function(intent, session, response) {
+    console.log("postNewFoodItemResponseFunction->" + JSON.stringify(intent.slots));
+    try {
+        postNewFoodItem(intent.slots, function(body) {
+            console.log("in postNewFoodItemResponseFunction function");
+            console.log("2." + body);
+            response.tell(body);
+        });
+    } catch (err) {
+        console.log(err.message);
+    }
 
 };
 
@@ -58,7 +73,8 @@ ListService.prototype.intentHandlers = {
     'HelloWorldIntent': helloResponseFunction,
     'ListIntent': listResponseFunction,
     'TotalCostIntent': totalCostResponseFunction,
-    'NumberItemIntent': numberItemResponseFunction
+    'NumberItemIntent': numberItemResponseFunction,
+    'AddItemIntent': postNewFoodItemResponseFunction
 };
 
 exports.handler = function(event, context) {
@@ -75,7 +91,7 @@ function onLaunchCall(eventCallback) {
 }
 
 function getNumberItem(value, eventCallback) {
-    options.path = '/api/item/' + value;
+    options.path = '/api/list/' + value;
     console.log(options.path);
     http.get(options, function(res) {
         var body = '';
@@ -95,6 +111,45 @@ function getNumberItem(value, eventCallback) {
         console.log("Got error: ", e);
     });
 }
+
+function postNewFoodItem(curItem, eventCallback) {
+    try {
+        var newItem = {};
+        newItem.text = curItem.FOOD.value;
+        console.log("slot data:" + JSON.stringify(newItem));
+        var post_data = JSON.stringify(newItem);
+        console.log("post_data->" + post_data);
+        var post_options = {
+            host: 'still-stream-24659.herokuapp.com',
+            path: '/api/list',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(post_data)
+            }
+        };
+        // Set up the request
+        var responseData = "";
+        var post_req = http.request(post_options, function(res) {
+            res.setEncoding('utf8');
+            res.on('data', function(chunk) {
+                responseData = responseData + chunk;
+                console.log('Response: ' + chunk);
+            });
+            res.on('end', function() {
+                console.log("post new food item");
+                // var bodyObject = JSON.parse(body);
+                console.log("3. responseData: " + responseData);
+                eventCallback(newItem.text + " added to your list.");
+            });
+        });
+        post_req.write(post_data);
+        post_req.end();
+    } catch (err) {
+        console.log("postNewFoodItem:" + err.message);
+    }
+}
+
 function getTotalCost(intentName, eventCallback) {
     options.path = '/api/metalist';
     http.get(options, function(res) {
@@ -117,6 +172,7 @@ function getTotalCost(intentName, eventCallback) {
 }
 
 function getList(intentName, eventCallback) {
+    options.path = "/api/list";
     http.get(options, function(res) {
         var body = '';
 
@@ -125,7 +181,7 @@ function getList(intentName, eventCallback) {
         });
 
         res.on('end', function() {
-            console.log ("getList: body response:" + body);
+            console.log("getList: body response:" + body);
             var bodyObject = JSON.parse(body);
             var responseText = "This is the " + intentName + ".  You have " + bodyObject.length + (bodyObject.length == 1 ? " item " : " items ") + "in your list.  ";
             if (bodyObject.length == 1) {
