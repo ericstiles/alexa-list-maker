@@ -42,9 +42,6 @@ var totalCostResponseFunction = function(intent, session, response) {
 };
 
 var numberItemResponseFunction = function(intent, session, response) {
-    console.log("1. numberItemResponseFunction:" + JSON.stringify(intent.slots));
-    console.log("2. numberItemResponseFunction:" + JSON.stringify(intent.slots.NUMBERCODE));
-    console.log("3. numberItemResponseFunction:" + JSON.stringify(intent.slots['NUMBERCODE']));
     getNumberItem(intent.slots.NUMBERCODE.value, function(body) {
         console.log("in numberItemResponseFunction function");
         console.log("body:" + body);
@@ -86,6 +83,7 @@ exports.handler = function(event, context) {
 
 function onLaunchCall(eventCallback) {
     var responseText = 'Hello Eric';
+    //TODO: send wakeup request to heroku app
     console.log(responseText);
     eventCallback(responseText);
 }
