@@ -1,6 +1,7 @@
 'use strict';
 var http = require('http');
 var AlexaSkill = require('./AlexaSkill');
+var _ = require("underscore");
 
 var APP_ID = 'amzn1.ask.skill.506f130c-3929-4169-bd15-768d20dded9c';
 
@@ -17,7 +18,7 @@ ListService.prototype = Object.create(AlexaSkill.prototype);
 var helloResponseFunction = function(intent, session, response) {
     onLaunchCall(function(body) {
         console.log("in helloResponseFunction function");
-        console.log("1." + body);
+        console.log("body:" + body);
         response.tell(body);
     });
 
@@ -25,7 +26,7 @@ var helloResponseFunction = function(intent, session, response) {
 var listResponseFunction = function(intent, session, response) {
     getList("ListIntent", function(body) {
         console.log("in listResponseFunction function");
-        console.log("2." + body);
+        console.log("body:" + body);
         response.tell(body);
     });
 
@@ -34,7 +35,7 @@ var listResponseFunction = function(intent, session, response) {
 var totalCostResponseFunction = function(intent, session, response) {
     getTotalCost("TotalCostIntent", function(body) {
         console.log("in totalCostResponseFunction function");
-        console.log("3." + body);
+        console.log("body:" + body);
         response.tell(body);
     });
 
@@ -44,10 +45,9 @@ var numberItemResponseFunction = function(intent, session, response) {
     console.log("1. numberItemResponseFunction:" + JSON.stringify(intent.slots));
     console.log("2. numberItemResponseFunction:" + JSON.stringify(intent.slots.NUMBERCODE));
     console.log("3. numberItemResponseFunction:" + JSON.stringify(intent.slots['NUMBERCODE']));
-    //    response.tell("SUCCESS");
     getNumberItem(intent.slots.NUMBERCODE.value, function(body) {
         console.log("in numberItemResponseFunction function");
-        console.log("4." + body);
+        console.log("body:" + body);
         response.tell(body);
     });
 
@@ -58,7 +58,7 @@ var postNewFoodItemResponseFunction = function(intent, session, response) {
     try {
         postNewFoodItem(intent.slots, function(body) {
             console.log("in postNewFoodItemResponseFunction function");
-            console.log("2." + body);
+            console.log("body:" + body);
             response.tell(body);
         });
     } catch (err) {
@@ -102,9 +102,9 @@ function getNumberItem(value, eventCallback) {
 
         res.on('end', function() {
             var bodyObject = JSON.parse(body);
-            console.log("3. body: " + body);
+            console.log("body:" + body);
             var responseText = "Your items is " + bodyObject.text + ".";
-            console.log("3." + responseText);
+            console.log("responseText:" + responseText);
             eventCallback(responseText);
         });
     }).on('error', function(e) {
@@ -116,9 +116,12 @@ function postNewFoodItem(curItem, eventCallback) {
     try {
         var newItem = {};
         newItem.text = curItem.FOOD.value;
+        if (!_.isUndefined(curItem.NUMBER)) {
+            newItem.quantity = curItem.NUMBER.value;
+        }
         console.log("slot data:" + JSON.stringify(newItem));
         var post_data = JSON.stringify(newItem);
-        console.log("post_data->" + post_data);
+        console.log("post_data:" + post_data);
         var post_options = {
             host: 'still-stream-24659.herokuapp.com',
             path: '/api/list',
@@ -128,18 +131,15 @@ function postNewFoodItem(curItem, eventCallback) {
                 'Content-Length': Buffer.byteLength(post_data)
             }
         };
-        // Set up the request
         var responseData = "";
         var post_req = http.request(post_options, function(res) {
             res.setEncoding('utf8');
             res.on('data', function(chunk) {
                 responseData = responseData + chunk;
-                console.log('Response: ' + chunk);
             });
             res.on('end', function() {
                 console.log("post new food item");
-                // var bodyObject = JSON.parse(body);
-                console.log("3. responseData: " + responseData);
+                console.log("responseData: " + responseData);
                 eventCallback(newItem.text + " added to your list.");
             });
         });
@@ -161,9 +161,9 @@ function getTotalCost(intentName, eventCallback) {
 
         res.on('end', function() {
             var bodyObject = JSON.parse(body);
-            console.log("3. body: " + body);
+            console.log("body: " + body);
             var responseText = "This is the " + intentName + ".  The total cost of your items is " + bodyObject.cTotal + ".";
-            console.log("3." + responseText);
+            console.log("responseText:" + responseText);
             eventCallback(responseText);
         });
     }).on('error', function(e) {
@@ -175,11 +175,9 @@ function getList(intentName, eventCallback) {
     options.path = "/api/list";
     http.get(options, function(res) {
         var body = '';
-
         res.on('data', function(chunk) {
             body += chunk;
         });
-
         res.on('end', function() {
             console.log("getList: body response:" + body);
             var bodyObject = JSON.parse(body);
@@ -201,7 +199,7 @@ function getList(intentName, eventCallback) {
                     }
                 }
             }
-            console.log("3." + responseText);
+            console.log("responseText:" + responseText);
             eventCallback(responseText);
         });
     }).on('error', function(e) {

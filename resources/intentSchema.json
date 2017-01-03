@@ -16,6 +16,9 @@
         "slots": [{
             "name": "FOOD",
             "type": "AMAZON.Food"
+        }, {
+            "name": "NUMBER",
+            "type": "AMAZON.Number"
         }]
     }]
 }

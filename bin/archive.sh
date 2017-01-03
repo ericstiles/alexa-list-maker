@@ -16,5 +16,5 @@ FILENAME=archive.$(date +"%m.%d.%Y.%H.%M").zip
 echo $FILENAME
 
 cd $SRC_DIR
-zip -r $ARCHIVE_DIR/$FILENAME ./index.js ./AlexaSkill.js ./package.json
+zip -r $ARCHIVE_DIR/$FILENAME ./index.js ./AlexaSkill.js ./package.json ./node_modules/underscore
 ls $ARCHIVE_DIR
